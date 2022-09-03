@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import { Component, onMount } from 'solid-js';
 
 import styles from './App.module.css';
 import {
@@ -15,13 +15,19 @@ import {
     Flex, Box, Spacer
 } from '@hope-ui/solid'
 import {DraftIcon, GlassesIcon} from './Icons';
-import Login from "./Login";
+import Login from "./user/Login";
 
 const config: HopeThemeConfig = {
     initialColorMode: "system", // 2. Add your color mode
 }
 
+const routes = new Map<string, string>();
+
 const App: Component = () => {
+    onMount(() => {
+        routes.set("", "");
+    });
+    
   return (
       <HopeProvider config={config}>
           <Flex p={"$2"}>

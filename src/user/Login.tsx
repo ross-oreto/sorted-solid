@@ -1,4 +1,4 @@
-import type {Component, Setter } from 'solid-js';
+import {Component, onMount, Setter, createSignal, createContext, useContext, Context, Accessor } from 'solid-js';
 import {
     Drawer
     , DrawerBody
@@ -16,19 +16,51 @@ import {
     , Button
     , HStack
     , Divider} from '@hope-ui/solid';
-import {FacebookIcon, GoogleIcon, LoginIcon} from "./Icons";
+import {FacebookIcon, GoogleIcon, LoginIcon} from "../Icons";
+import User, { Profile } from './User';
 
-import {createSignal} from "solid-js";
+const testUser: User = new User("ross.oreto", "ross.oreto@gmail.com", new Profile("Ross", "Oreto"));
+const LoginContext: Context<User> = createContext<User>(testUser);
+export function LoginProvider(props: any) {
+    return (
+        <LoginContext.Provider value={createSignal<User>(testUser)}>
+            {props.children}
+        </LoginContext.Provider>
+    );
+}
+
+function useLogin() {
+    const ctx = useContext(LoginContext);
+    if (ctx) {
+      return ctx;
+    }
+    throw new Error('Missing Login');
+  }
+// export const useLogin  = () => useContext(LoginContext)!;
 
 
 const Login: Component = () => {
-    const [ isLoggedIn, setLogin] = createSignal(false);
+    // const [getUser, setUser] = createSignal<User>();
+    const [getUser, setUser] = useLogin();
     const { isOpen, onOpen, onClose } = createDisclosure();
+
+    // onMount(() => {
+    //     console.info("mounting");
+    //     FB.getLoginStatus(function(response) {
+    //         if (response.status == 'connected') {
+    //             setUser(testUser);
+    //         } else {
+    //             setUser();
+    //         }
+    //         console.info(response);
+    //     });
+    // });
 
     return (
         <Box h="100%" me={"10px"}>
-            { isLoggedIn() ? (
-                <UserDrawer login={setLogin} />
+            { getUser() ? (
+                // <UserDrawer login={setUser} />
+                <UserDrawer />
             ) : (
                 <>
                 <Anchor onClick={onOpen}>
@@ -50,7 +82,7 @@ const Login: Component = () => {
                                 <HStack>
                                     <Button onClick={() => {
                                         onClose();
-                                        setInterval(() => setLogin(true), 300);
+                                        setTimeout(() => setUser(testUser), 300);
                                     }}
                                             leftIcon={<FacebookIcon boxSize="$4"/>}
                                             colorScheme="info"
@@ -59,9 +91,13 @@ const Login: Component = () => {
                                     </Button>
                                 </HStack>
                                 <HStack>
-                                    <Button onClick={() => setLogin(true)}
-                                            leftIcon={<GoogleIcon boxSize="$4" />}
-                                            colorScheme="info" width={"150px"}>
+                                    <Button onClick={() => {
+                                        onClose();
+                                        setTimeout(() => setUser(testUser), 300);
+                                    }}
+                                            leftIcon={<FacebookIcon boxSize="$4"/>}
+                                            colorScheme="info"
+                                            width={"150px"} mb={"10px"}>
                                         google
                                     </Button>
                                 </HStack>
@@ -75,8 +111,9 @@ const Login: Component = () => {
     );
 };
 
-const UserDrawer: Component<{login: Setter<boolean>}> = (props) => {
+const UserDrawer: Component = (props) => {
     const { isOpen, onOpen, onClose } = createDisclosure();
+    const [ getUser, setUser ] = useLogin(); 
 
     return (
         <>
@@ -96,7 +133,7 @@ const UserDrawer: Component<{login: Setter<boolean>}> = (props) => {
                     <Divider/>
                     <Box p={"10px"} cursor="pointer" onClick={() => {
                         onClose();
-                        props.login(false);
+                        setUser(null);
                     }}>
                         <Text>Sign out</Text>
                     </Box>
