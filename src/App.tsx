@@ -15,30 +15,31 @@ import {
     Flex, Box, Spacer
 } from '@hope-ui/solid'
 import {DraftIcon, GlassesIcon} from './Icons';
+import { LoginProvider } from './user/LoginContext';
 import Login from "./user/Login";
+import { useI18n, useInfo } from './info/InfoContext';
 
 const config: HopeThemeConfig = {
     initialColorMode: "system", // 2. Add your color mode
 }
 
-const routes = new Map<string, string>();
-
-const App: Component = () => {
-    onMount(() => {
-        routes.set("", "");
-    });
+const App: Component = (props) => {
+    onMount(() => {});
+    const i18n = useI18n();
+    const info = useInfo();
     
-  return (
+    return (
+    <LoginProvider>
       <HopeProvider config={config}>
           <Flex p={"$2"}>
               <Box>
                   <Heading fontFamily={"cursive"} fontSize={"25px"} as={"i"}>
-                      Sorted
+                    {i18n.t("app.title")}
                   </Heading>
               </Box>
               <Spacer/>
               <Box>
-                  <Badge colorScheme="danger">dev</Badge>
+                  <Badge colorScheme="danger">{info.mode}</Badge>
               </Box>
               <Spacer/>
               <Login/>
@@ -51,7 +52,7 @@ const App: Component = () => {
                       <Center>
                           <VStack>
                               <GlassesIcon boxSize="$7" color={"$primary9"}/>
-                              <Text size="xs" color={"$primary9"}>Reviews</Text>
+                              <Text size="xs" color={"$primary9"}>{i18n.t("reviews")}</Text>
                           </VStack>
                       </Center>
                   </Anchor>
@@ -59,14 +60,15 @@ const App: Component = () => {
                       <Center>
                           <VStack>
                               <DraftIcon boxSize="$7"/>
-                              <Text size="xs">Drafts</Text>
+                              <Text size="xs">{i18n.t("drafts")}</Text>
                           </VStack>
                       </Center>
                   </Anchor>
               </SimpleGrid>
           </div>
       </HopeProvider>
-  );
+    </LoginProvider>
+    );
 };
 
 export default App;

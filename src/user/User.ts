@@ -1,10 +1,14 @@
 
 export default class User {
-    constructor(username: string, email: string, profile: Profile) {
+    constructor(public username: string, public email: string, public profile: Profile) {
+    }
+
+    name(): string {
+        return `${this.profile.firstName} ${this.profile.lastName}`;
     }
 }
 
 export class Profile {
-    constructor(firstName: string, lastName: string) {
+    constructor(public firstName: string, public lastName: string) {
     }
 }

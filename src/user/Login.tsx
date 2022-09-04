@@ -1,4 +1,4 @@
-import {Component, onMount, Setter, createSignal, createContext, useContext, Context, Accessor } from 'solid-js';
+import {Component, onMount, Setter, createSignal, createContext, useContext, Context, Accessor, Signal } from 'solid-js';
 import {
     Drawer
     , DrawerBody
@@ -18,55 +18,36 @@ import {
     , Divider} from '@hope-ui/solid';
 import {FacebookIcon, GoogleIcon, LoginIcon} from "../Icons";
 import User, { Profile } from './User';
+import { useLogin } from './LoginContext';
+import { useI18n } from '../info/InfoContext';
 
 const testUser: User = new User("ross.oreto", "ross.oreto@gmail.com", new Profile("Ross", "Oreto"));
-const LoginContext: Context<User> = createContext<User>(testUser);
-export function LoginProvider(props: any) {
-    return (
-        <LoginContext.Provider value={createSignal<User>(testUser)}>
-            {props.children}
-        </LoginContext.Provider>
-    );
-}
-
-function useLogin() {
-    const ctx = useContext(LoginContext);
-    if (ctx) {
-      return ctx;
-    }
-    throw new Error('Missing Login');
-  }
-// export const useLogin  = () => useContext(LoginContext)!;
-
 
 const Login: Component = () => {
-    // const [getUser, setUser] = createSignal<User>();
+    const i18n = useI18n();
     const [getUser, setUser] = useLogin();
     const { isOpen, onOpen, onClose } = createDisclosure();
 
-    // onMount(() => {
-    //     console.info("mounting");
-    //     FB.getLoginStatus(function(response) {
-    //         if (response.status == 'connected') {
-    //             setUser(testUser);
-    //         } else {
-    //             setUser();
-    //         }
-    //         console.info(response);
-    //     });
-    // });
+    onMount(() => {
+        FB.getLoginStatus(function(response) {
+            if (response.status == 'connected') {
+                setUser(testUser);
+            } else {
+                setUser(null);
+            }
+        });
+    });
 
     return (
         <Box h="100%" me={"10px"}>
             { getUser() ? (
-                // <UserDrawer login={setUser} />
-                <UserDrawer />
+                <UserDrawer/>
             ) : (
                 <>
                 <Anchor onClick={onOpen}>
                     <VStack>
                         <LoginIcon boxSize="$7"/>
-                        <Text size="xs">Sign in</Text>
+                        <Text size="xs">{i18n.t('login')}</Text>
                     </VStack>
                 </Anchor>
                 <Drawer
@@ -76,7 +57,7 @@ const Login: Component = () => {
                     <DrawerOverlay/>
                     <DrawerContent>
                         <DrawerCloseButton />
-                        <DrawerHeader>Choose login provider</DrawerHeader>
+                        <DrawerHeader>{i18n.t('login.provider')}</DrawerHeader>
                         <DrawerBody>
                             <VStack>
                                 <HStack>
@@ -87,7 +68,7 @@ const Login: Component = () => {
                                             leftIcon={<FacebookIcon boxSize="$4"/>}
                                             colorScheme="info"
                                             width={"150px"} mb={"10px"}>
-                                        facebook
+                                        {i18n.t('facebook')}
                                     </Button>
                                 </HStack>
                                 <HStack>
@@ -95,10 +76,10 @@ const Login: Component = () => {
                                         onClose();
                                         setTimeout(() => setUser(testUser), 300);
                                     }}
-                                            leftIcon={<FacebookIcon boxSize="$4"/>}
+                                            leftIcon={<GoogleIcon boxSize="$4"/>}
                                             colorScheme="info"
                                             width={"150px"} mb={"10px"}>
-                                        google
+                                        {i18n.t('google')}
                                     </Button>
                                 </HStack>
                             </VStack>
@@ -128,7 +109,7 @@ const UserDrawer: Component = (props) => {
                     <DrawerCloseButton />
                     <DrawerHeader>
                         <Avatar name="Ross Oreto" src="https://bit.ly/37dJ0m7"/>
-                        <Badge colorScheme="info">Ross Oreto</Badge>
+                        <Badge colorScheme="info">{getUser?.name}</Badge>
                     </DrawerHeader>
                     <Divider/>
                     <Box p={"10px"} cursor="pointer" onClick={() => {
